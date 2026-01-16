@@ -7,6 +7,12 @@ Complete API documentation for the Palm Payment Backend system with biometric pa
 ## Base URL
 
 ```
+https://api.ceit-iot-lab.site/api
+```
+
+For local development:
+
+```
 http://localhost:3000/api
 ```
 
@@ -733,7 +739,7 @@ Authorization: Bearer <token>
 ### 1. Register a User
 
 ```bash
-curl -X POST http://localhost:3000/api/auth/register \
+curl -X POST https://api.ceit-iot-lab.site/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "first_name": "John",
@@ -747,7 +753,7 @@ curl -X POST http://localhost:3000/api/auth/register \
 ### 2. Login
 
 ```bash
-curl -X POST http://localhost:3000/api/auth/login \
+curl -X POST https://api.ceit-iot-lab.site/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "phone": "85620123456",
@@ -758,7 +764,7 @@ curl -X POST http://localhost:3000/api/auth/login \
 ### 3. Get Profile
 
 ```bash
-curl -X GET http://localhost:3000/api/users/profile \
+curl -X GET https://api.ceit-iot-lab.site/api/users/profile \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
@@ -766,7 +772,7 @@ curl -X GET http://localhost:3000/api/users/profile \
 
 ```bash
 # Using palm code in header
-curl -X POST http://localhost:3000/api/users/topup \
+curl -X POST https://api.ceit-iot-lab.site/api/users/topup \
   -H "x-palm-code: PALM_ABC123" \
   -H "Content-Type: application/json" \
   -d '{
@@ -774,7 +780,7 @@ curl -X POST http://localhost:3000/api/users/topup \
   }'
 
 # Using Bearer token
-curl -X POST http://localhost:3000/api/users/topup \
+curl -X POST https://api.ceit-iot-lab.site/api/users/topup \
   -H "Authorization: Bearer YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -786,7 +792,7 @@ curl -X POST http://localhost:3000/api/users/topup \
 
 ```bash
 # Using palm code in header
-curl -X POST http://localhost:3000/api/orders \
+curl -X POST https://api.ceit-iot-lab.site/api/orders \
   -H "x-palm-code: PALM_ABC123" \
   -H "Content-Type: application/json" \
   -d '{
@@ -796,7 +802,7 @@ curl -X POST http://localhost:3000/api/orders \
   }'
 
 # Using Bearer token
-curl -X POST http://localhost:3000/api/orders \
+curl -X POST https://api.ceit-iot-lab.site/api/orders \
   -H "Authorization: Bearer YOUR_TOKEN_HERE" \
   -H "Content-Type: application/json" \
   -d '{
@@ -809,14 +815,14 @@ curl -X POST http://localhost:3000/api/orders \
 ### 6. Get Top-Up History
 
 ```bash
-curl -X GET http://localhost:3000/api/transactions/topup-history \
+curl -X GET https://api.ceit-iot-lab.site/api/transactions/topup-history \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
 ### 7. Get Order History
 
 ```bash
-curl -X GET http://localhost:3000/api/transactions/order-history \
+curl -X GET https://api.ceit-iot-lab.site/api/transactions/order-history \
   -H "Authorization: Bearer YOUR_TOKEN_HERE"
 ```
 
