@@ -5,8 +5,9 @@
   "scripts": {
     "dev": "nodemon --exec bun run src/index.ts",
     "dev:bun": "bun --watch src/index.ts",
-    "build": "bun build src/index.ts --outdir ./dist --target bun",
-    "start": "bun dist/index.js",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "start:bun": "bun src/index.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio"
@@ -26,8 +27,10 @@
     "@types/bcrypt": "^5.0.2",
     "@types/jsonwebtoken": "^9.0.5",
     "@types/cors": "^2.8.17",
+    "@types/node": "^25.0.9",
     "prisma": "^5.22.0",
     "bun-types": "latest",
-    "nodemon": "^3.0.2"
+    "nodemon": "^3.0.2",
+    "typescript": "^5.9.3"
   }
 }
