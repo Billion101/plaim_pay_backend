@@ -2,7 +2,6 @@ import { Response } from 'express';
 import prisma from '../config/database';
 import { AuthRequest } from '../middleware/auth.middleware';
 import { createOrderSchema } from '../validators/order.validator';
-import { createPhajayPayment } from '../services/phajay.service';
 
 export const createOrder = async (req: AuthRequest, res: Response) => {
     try {
@@ -25,24 +24,15 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
             });
         }
 
-        // Create PhajayPay payment link
-        const tempOrderId = `order_${Date.now()}_${req.userId}`;
-        const paymentResponse = await createPhajayPayment({
-            orderId: tempOrderId,
-            amount: validatedData.amount,
-            customerPhone: user.phone,
-            customerName: `${user.first_name} ${user.last_name}`,
-            description: validatedData.description || 'Order payment'
-        });
-
-        // Create order with completed status
+        // Create order with completed status (no payment link needed)
+        const transactionId = `order_${Date.now()}_${req.userId}`;
         const order = await prisma.order.create({
             data: {
                 user_id: req.userId!,
                 amount: validatedData.amount,
-                payment_method: 'phajay',
+                payment_method: 'balance',
                 payment_status: 'completed',
-                transaction_id: paymentResponse.transactionId || tempOrderId,
+                transaction_id: transactionId,
                 items: validatedData.items || null
             }
         });
@@ -67,11 +57,7 @@ export const createOrder = async (req: AuthRequest, res: Response) => {
         res.status(201).json({
             message: 'Order created successfully - balance deducted',
             order: order,
-            user: updatedUser,
-            payment: {
-                paymentUrl: paymentResponse.paymentUrl,
-                qrCode: paymentResponse.qrCode
-            }
+            user: updatedUser
         });
     } catch (error: any) {
         console.error('Create order error:', error);
