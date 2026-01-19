@@ -2,6 +2,7 @@ import { Response } from 'express';
 import prisma from '../config/database';
 import { AuthRequest } from '../middleware/auth.middleware';
 import { verifyPalmSchema, topUpSchema } from '../validators/user.validator';
+import { isPalmMatch, normalizePalmEmbedding } from '../services/palm-embedding.service';
 
 export const getProfile = async (req: AuthRequest, res: Response) => {
     try {
@@ -34,18 +35,37 @@ export const verifyPalm = async (req: AuthRequest, res: Response) => {
     try {
         const validatedData = verifyPalmSchema.parse(req.body);
 
-        const existingPalm = await prisma.user.findUnique({
-            where: { plam_code: validatedData.plam_code }
+        // Normalize the palm embedding (handles base64, array, or object format)
+        const normalizedPalm = normalizePalmEmbedding(validatedData.plam_code);
+
+        // Check if palm embedding already exists
+        const usersWithPalm = await prisma.user.findMany({
+            where: {
+                plam_code: { not: null },
+                vertify_plam: true,
+                id: { not: req.userId } // Exclude current user
+            },
+            select: {
+                id: true,
+                plam_code: true
+            }
         });
 
-        if (existingPalm && existingPalm.id !== req.userId) {
-            return res.status(400).json({ error: 'Palm code already registered' });
+        // Check for duplicate palm embeddings
+        for (const user of usersWithPalm) {
+            if (user.plam_code && Array.isArray(user.plam_code)) {
+                const storedEmbedding = user.plam_code as number[];
+
+                if (isPalmMatch(normalizedPalm, storedEmbedding)) {
+                    return res.status(400).json({ error: 'Palm already registered' });
+                }
+            }
         }
 
         const user = await prisma.user.update({
             where: { id: req.userId },
             data: {
-                plam_code: validatedData.plam_code,
+                plam_code: normalizedPalm as any,
                 vertify_plam: true
             },
             select: {

@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import prisma from '../config/database';
 import { registerSchema, loginSchema } from '../validators/user.validator';
+import { validatePalmEmbedding, isPalmMatch, normalizePalmEmbedding } from '../services/palm-embedding.service';
 
 export const register = async (req: Request, res: Response) => {
     try {
@@ -16,12 +17,42 @@ export const register = async (req: Request, res: Response) => {
             return res.status(400).json({ error: 'Phone number already registered' });
         }
 
+        // Check if palm embedding already exists (if provided)
+        if (validatedData.plam_code) {
+            // Normalize the palm embedding to standard format
+            const normalizedPalm = normalizePalmEmbedding(validatedData.plam_code);
+
+            const usersWithPalm = await prisma.user.findMany({
+                where: {
+                    plam_code: { not: null },
+                    vertify_plam: true
+                },
+                select: {
+                    plam_code: true
+                }
+            });
+
+            // Check for duplicate palm embeddings
+            for (const user of usersWithPalm) {
+                if (user.plam_code && Array.isArray(user.plam_code)) {
+                    const storedEmbedding = user.plam_code as number[];
+
+                    if (isPalmMatch(normalizedPalm, storedEmbedding)) {
+                        return res.status(400).json({ error: 'Palm already registered' });
+                    }
+                }
+            }
+        }
+
         const hashedPassword = await bcrypt.hash(validatedData.password, 10);
 
         const user = await prisma.user.create({
             data: {
-                ...validatedData,
+                first_name: validatedData.first_name,
+                last_name: validatedData.last_name,
+                phone: validatedData.phone,
                 password: hashedPassword,
+                plam_code: validatedData.plam_code ? normalizePalmEmbedding(validatedData.plam_code) as any : null,
                 vertify_plam: !!validatedData.plam_code
             },
             select: {
